@@ -1,29 +1,27 @@
 #!/usr/bin/python3
-# This is the state class
-import models
-from models import *
-from sqlalchemy import Column, String
-from sqlalchemy.orm import relationship, backref
+"""This is the state class"""
 from os import getenv
+from sqlalchemy import String, DateTime, Column, ForeignKey
+from sqlalchemy.orm import relationship
+import models
+from models.base_model import BaseModel, Base
+from models.city import City
 
 
 class State(BaseModel, Base):
-    __tablename__ = "states"
+    """This is the class for State
+    Attributes:
+        name: input name
+    """
+    __tablename__ = 'states'
     name = Column(String(128), nullable=False)
 
-    cities = relationship("City", backref="state",
-                          cascade="all, delete, delete-orphan")
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-    if getenv('HBNB_TYPE_STORAGE', '') != 'db':
+    if getenv('HBNB_TYPE_STORAGE') == 'db':
+        cities = relationship('City', backref='state',
+                              cascade='all, delete-orphan')
+    else:
         @property
         def cities(self):
-            all_cities = models.storage.all("City")
-            temp = []
-            for c_id in all_cities:
-                if all_cities[c_id].state_id == self.id:
-                    temp.append(all_cities[c_id])
-
-            return temp
+            """Getter attribute in case of file storage"""
+            return [city for city in models.storage.all(City).values()
+                    if city.state_id == self.id]
