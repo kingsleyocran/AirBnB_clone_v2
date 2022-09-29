@@ -3,14 +3,14 @@
 contents of the web_static folder
 Distributes an archive to a web server"""
 
-from fabric.operations import local, run, put
+from fabric.operations import local, run, put, sudo
 from datetime import datetime
 import os
 from fabric.api import env
 import re
 
 
-env.hosts = ['35.190.176.186', '35.196.156.157']
+env.hosts = ['3.236.139.103', '44.197.108.121']
 
 
 def do_pack():
@@ -34,29 +34,29 @@ def do_deploy(archive_path):
     res = put(archive_path, "/tmp/{}.tgz".format(filename))
     if res.failed:
         return False
-    res = run("mkdir -p /data/web_static/releases/{}/".format(filename))
+    res = sudo("mkdir -p /data/web_static/releases/{}/".format(filename))
     if res.failed:
         return False
-    res = run("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
+    res = sudo("tar -xzf /tmp/{}.tgz -C /data/web_static/releases/{}/"
               .format(filename, filename))
     if res.failed:
         return False
-    res = run("rm /tmp/{}.tgz".format(filename))
+    res = sudo("rm /tmp/{}.tgz".format(filename))
     if res.failed:
         return False
-    res = run("mv /data/web_static/releases/{}"
+    res = sudo("mv /data/web_static/releases/{}"
               "/web_static/* /data/web_static/releases/{}/"
               .format(filename, filename))
     if res.failed:
         return False
-    res = run("rm -rf /data/web_static/releases/{}/web_static"
+    res = sudo("rm -rf /data/web_static/releases/{}/web_static"
               .format(filename))
     if res.failed:
         return False
-    res = run("rm -rf /data/web_static/current")
+    res = sudo("rm -rf /data/web_static/current")
     if res.failed:
         return False
-    res = run("ln -s /data/web_static/releases/{}/ /data/web_static/current"
+    res = sudo("ln -s /data/web_static/releases/{}/ /data/web_static/current"
               .format(filename))
     if res.failed:
         return False
